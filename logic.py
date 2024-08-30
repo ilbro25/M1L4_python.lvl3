@@ -1,5 +1,7 @@
 from random import randint
+
 import requests
+
 
 class Pokemon:
     pokemons = {}
@@ -7,12 +9,13 @@ class Pokemon:
     def __init__(self, pokemon_trainer):
 
         self.pokemon_trainer = pokemon_trainer   
-    
+
         self.pokemon_number = randint(1,1000)
         self.img = self.get_img()
         self.name = self.get_name()
-        self.HP = self.get_HP()
-        self.attack = self.get_attack()
+
+        self.power = randint(30, 60)
+        self.hp = randint(200, 400)
 
         Pokemon.pokemons[pokemon_trainer] = self
 
@@ -25,7 +28,7 @@ class Pokemon:
             return (data['sprites']['other']['official-artwork']['front_default'])
         else:
             return "https://static.wikia.nocookie.net/pokemon/images/0/0d/025Pikachu.png/revision/latest/scale-to-width-down/1000?cb=20181020165701&path-prefix=ru"
-    
+
     # Метод для получения имени покемона через API
     def get_name(self):
         url = f'https://pokeapi.co/api/v2/pokemon/{self.pokemon_number}'
@@ -36,42 +39,48 @@ class Pokemon:
         else:
             return "Pikachu"
 
-     # Метод для получения здоровья покемона через API
-    def get_HP(self):
-        url = f'https://pokeapi.co/api/v2/pokemon/{self.pokemon_number}'
-        response = requests.get(url)
-        if response.status_code == 200:
-            data = response.json()
-            return (data['stats'][0]['base_stat'])
-        else:
-            return "Я не знаю его HP"
-        
-     # Метод для получения силы атаки покемона через API
-    def get_attack(self):
-        url = f'https://pokeapi.co/api/v2/pokemon/{self.pokemon_number}'
-        response = requests.get(url)
-        if response.status_code == 200:
-            data = response.json()
-            return (data['stats'][1]['base_stat'])
-        else:
-            return "Видимо он бессильный"
 
     # Метод класса для получения информации
     def info(self):
-        return f"Имя твоего покеомона: {self.name} \nHP: {self.HP} \nСила атаки: {self.attack}"
+        return f"Имя твоего покеомона: {self.name}\nСила: {self.power}\nЗдоровье: {self.hp}"
 
     # Метод класса для получения картинки покемона
     def show_img(self):
         return self.img
-    
-    # Метод класса для получения здоровья покемона
-    def show_HP(self):
-        return self.HP
-    
-    # Метод класса для получения силы атаки покемона
-    def show_attack(self):
-        return self.attack
-    
+
+    def attack(self, enemy):
+        if isinstance(enemy, Wizard):
+            chance = randint(1, 5)
+            if chance == 1:
+                return f'Покемон-волшебник применил щит в сражении'
+        if enemy.hp > self.power:
+            enemy.hp -= self.power
+            return f'Сражение @{self.name} с @{enemy.name}'
+        else:
+            enemy.hp = 0
+            return f'Победа @{self.name} над @{enemy.name}'
+        
+
+class Wizard(Pokemon):
+    pass
+
+class Fighter(Pokemon):
+    def attack(self, enemy):
+        super_power = randint(5, 15)
+        self.power += super_power
+        result = super().attack(enemy)
+        self.power -= super_power
+        return result + f'\nБоец применил супер-атаку силой: {super_power}'
+        
+if __name__ == '__main__':
+    wizard = Wizard("username1")
+    fighter = Fighter("username2")
+
+    print(wizard.info())
+    print()
+    print(fighter.info())
+    print()
+    print(fighter.attack(wizard))
     
 
 
